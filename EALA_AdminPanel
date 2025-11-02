@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>EALA80 — Admin Panel</title>
+<style>
+:root{--bg:#fff3b0;--card:#ffffff;--accent:#ff8c00;--muted:#333}
+*{box-sizing:border-box;font-family:Inter,Segoe UI,Arial}
+body{margin:0;background:var(--bg);color:var(--muted);padding:18px}
+.container{max-width:1100px;margin:0 auto}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.logo{font-weight:800;font-size:20px}
+.card{background:rgba(255,255,255,0.95);border-radius:12px;padding:14px;margin-bottom:12px;border:1px solid #1112}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.col{flex:1 1 300px;min-width:260px}
+.label{font-weight:700;margin-bottom:6px;display:block}
+.input,textarea,select{width:100%;padding:10px;border-radius:8px;border:1px solid #eee;margin-bottom:8px}
+.btn{background:var(--accent);color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
+.btn.secondary{background:#eee;color:#222}
+.small{font-size:13px;color:#666}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:8px;border-bottom:1px solid #f1f1f1;text-align:left}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.footer{font-size:12px;color:#444;text-align:center;margin-top:14px}
+@media(max-width:760px){.row{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div id="loginCard" class="card">
+    <div class="header">
+      <div class="logo">EALA80 Admin</div>
+      <div style="margin-left:auto" class="small">Login with admin credentials</div>
+    </div>
+    <div>
+      <label class="label">Username</label>
+      <input id="loginUser" class="input" placeholder="Username" value="">
+      <label class="label">Password</label>
+      <input id="loginPass" class="input" type="password" placeholder="Password" value="">
+      <div style="margin-top:8px">
+        <button id="btnLogin" class="btn">Login</button>
+        <button id="btnFillDemo" class="btn secondary">Reset Demo Data</button>
+      </div>
+      <p class="small" style="margin-top:8px">Admin: <strong>EALA80</strong> / Password: <strong>Alif298019</strong></p>
+    </div>
+  </div>
+
+  <div id="panel" style="display:none">
+    <div class="card header">
+      <div>
+        <div class="logo">EALA80</div>
+        <div class="small">Full admin control • Uses localStorage by default. See README to enable Firebase for realtime sync.</div>
+      </div>
+      <div style="margin-left:auto" id="adminInfo" class="small">Admin</div>
+      <div><button id="btnLogout" class="btn secondary">Logout</button></div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div class="col">
+          <h3>Product Management</h3>
+          <label class="label">Add product</label>
+          <input id="prodTitle" class="input" placeholder="Product title (e.g. Amazon task)">
+          <input id="prodPrice" class="input" placeholder="Price (USD)">
+          <input id="prodStock" class="input" placeholder="Stock (quantity)">
+          <div class="controls"><button id="addProd" class="btn">Add Product</button>
+            <button id="refreshProd" class="btn secondary">Refresh</button></div>
+          <div id="prodList" style="margin-top:10px"></div>
+        </div>
+
+        <div class="col">
+          <h3>Combo Packages</h3>
+          <label class="label">Combo name</label>
+          <input id="comboName" class="input" placeholder="Combo title">
+          <label class="label">Select products (hold ctrl/cmd)</label>
+          <select id="comboProducts" class="input" multiple style="height:120px"></select>
+          <label class="label">Combo price (USD)</label>
+          <input id="comboPrice" class="input" placeholder="Combo price">
+          <div class="controls"><button id="createCombo" class="btn">Create Combo</button>
+            <button id="refreshCombo" class="btn secondary">Refresh</button></div>
+          <div id="comboList" style="margin-top:10px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div class="col">
+          <h3>Wallet / Deposit</h3>
+          <label class="label">Currency label</label>
+          <input id="currency" class="input" value="USD">
+          <label class="label">Deposit address</label>
+          <input id="depositAddr" class="input" placeholder="e.g. USDT address or payment link">
+          <div class="controls"><button id="saveWallet" class="btn">Save</button></div>
+        </div>
+
+        <div class="col">
+          <h3>Invite Codes</h3>
+          <label class="label">Generate count</label>
+          <input id="inviteCount" class="input" value="1">
+          <label class="label">Usage limit (leave empty = unlimited)</label>
+          <input id="inviteLimit" class="input" placeholder="e.g. 1">
+          <div class="controls"><button id="genInvite" class="btn">Generate</button>
+            <button id="refreshInv" class="btn secondary">Refresh</button></div>
+          <div id="inviteList" style="margin-top:10px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div class="col">
+          <h3>User Control</h3>
+          <label class="label">Search username</label>
+          <input id="searchUser" class="input" placeholder="username">
+          <div class="controls" style="margin-top:6px">
+            <button id="findUser" class="btn">Find</button>
+            <button id="listUsers" class="btn secondary">List All</button>
+          </div>
+          <div id="userPanel" style="margin-top:10px"></div>
+        </div>
+
+        <div class="col">
+          <h3>Logo / Site Profile</h3>
+          <label class="label">Site Title</label>
+          <input id="siteTitle" class="input" placeholder="Site title">
+          <label class="label">Site Description</label>
+          <textarea id="siteDesc" class="input" rows="3"></textarea>
+          <label class="label">Upload Logo (PNG/JPG)</label>
+          <input id="logoFile" type="file" accept="image/*" class="input">
+          <div style="margin-top:8px" class="controls"><button id="saveProfile" class="btn">Save</button></div>
+          <div style="margin-top:8px"><img id="logoPreview" alt="logo" style="max-width:160px;border-radius:8px;border:1px solid #eee"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Transactions & Logs</h3>
+      <div style="margin-top:8px" class="small">Recent actions (add product, invite generated, balance adjusted)</div>
+      <div id="logArea" style="margin-top:8px"></div>
+      <div style="margin-top:10px" class="controls"><button id="clearLogs" class="btn secondary">Clear Logs</button></div>
+    </div>
+
+    <div class="footer">EALA80 Admin Panel — local demo. To enable real-time syncing across devices, add Firebase settings as described in README.</div>
+  </div>
+</div>
+
+<script>
+// Data storage helpers: localStorage key
+const STORAGE_KEY = 'eala_full_state_v1';
+function loadState(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {} } catch(e){ return {} } }
+function saveState(s){ localStorage.setItem(STORAGE_KEY, JSON.stringify(s)) }
+function uid(){ return Math.random().toString(36).slice(2,9) }
+
+let state = loadState();
+if(!state.site) state.site = {title:'EALA80', desc:'User panel connected', logo:''};
+if(!state.users) state.users = [{id:uid(), username:'demo_user', balance:100, vip:0, blocked:false, invite:''}];
+if(!state.products) state.products = [{id:uid(), title:'Demo Pack A', price:5, stock:50}, {id:uid(), title:'Demo Pack B', price:10, stock:20}];
+if(!state.combos) state.combos = [];
+if(!state.invites) state.invites = [];
+if(!state.wallet) state.wallet = {currency:'USD', address:''};
+if(!state.logs) state.logs = [];
+saveState(state);
+
+// Auth
+const ADMIN_USER = 'EALA80', ADMIN_PASS = 'Alif298019';
+const loginCard = document.getElementById('loginCard'), panel = document.getElementById('panel');
+document.getElementById('btnLogin').addEventListener('click', ()=>{
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
+  if(u === ADMIN_USER && p === ADMIN_PASS){ loginCard.style.display='none'; panel.style.display='block'; renderAll(); } else alert('Invalid credentials');
+});
+document.getElementById('btnLogout').addEventListener('click', ()=> location.reload());
+document.getElementById('btnFillDemo').addEventListener('click', ()=>{ if(confirm('Reset demo data?')){ localStorage.removeItem(STORAGE_KEY); location.reload(); } });
+
+// Render helpers
+function renderAll(){ renderProducts(); renderCombos(); renderInvites(); renderUsersList(); renderSiteProfile(); renderLogs(); }
+function renderProducts(){
+  const el = document.getElementById('prodList');
+  el.innerHTML = '<table class="table"><thead><tr><th>Title</th><th>Price(USD)</th><th>Stock</th><th>Actions</th></tr></thead><tbody>' +
+    state.products.map(p=>`<tr><td>${p.title}</td><td>${p.price}</td><td>${p.stock}</td><td><button onclick="editProduct('${p.id}')">Edit</button> <button onclick="removeProduct('${p.id}')">Remove</button></td></tr>`).join('') +
+    '</tbody></table>';
+  const sel = document.getElementById('comboProducts');
+  sel.innerHTML = state.products.map(p=>`<option value="${p.id}">${p.title} — $${p.price}</option>`).join('');
+}
+function renderCombos(){
+  const el = document.getElementById('comboList');
+  el.innerHTML = state.combos.length? '<ul>' + state.combos.map(c=>`<li><b>${c.name}</b> — $${c.price} <button onclick="removeCombo('${c.id}')">Remove</button></li>`).join('') + '</ul>' : '<div class="small">No combos</div>';
+}
+function renderInvites(){
+  const el = document.getElementById('inviteList');
+  el.innerHTML = state.invites.length? '<ul>' + state.invites.map(i=>`<li>${i.code} (used:${i.used||0}) <button onclick="removeInvite('${i.code}')">Remove</button></li>`).join('') + '</ul>' : '<div class="small">No invites</div>';
+}
+function renderUsersList(){
+  const el = document.getElementById('userPanel');
+  el.innerHTML = state.users.length? '<table class="table"><thead><tr><th>Username</th><th>Balance</th><th>VIP</th><th>Status</th><th>Actions</th></tr></thead><tbody>' + state.users.map(u=>`<tr><td>${u.username}</td><td>${u.balance}</td><td>${u.vip||0}</td><td>${u.blocked?'<span style="color:red">Blocked</span>':'Active'}</td><td><button onclick="openEditUser('${u.id}')">Edit</button> <button onclick="toggleBlock('${u.id}')">${u.blocked? 'Unblock':'Block'}</button> <button onclick="removeUser('${u.id}')">Remove</button></td></tr>`).join('') + '</tbody></table>' : '<div class="small">No users</div>';
+}
+function renderSiteProfile(){
+  document.getElementById('siteTitle').value = state.site.title||'EALA80';
+  document.getElementById('siteDesc').value = state.site.desc||'';
+  document.getElementById('logoPreview').src = state.site.logo || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60"><rect width="100%" height="100%" fill="%237b3cff"/><text x="20" y="40" font-size="28" fill="white">EALA80</text></svg>';
+  document.getElementById('currency').value = state.wallet.currency || 'USD';
+  document.getElementById('depositAddr').value = state.wallet.address || '';
+}
+function renderLogs(){
+  const el = document.getElementById('logArea');
+  el.innerHTML = state.logs.length? '<ul>' + state.logs.slice().reverse().map(l=>`<li>${new Date(l.t).toLocaleString()}: ${l.msg}</li>`).join('') + '</ul>' : '<div class="small">No logs yet</div>';
+}
+
+// product actions
+document.getElementById('addProd').addEventListener('click', ()=>{
+  const title = document.getElementById('prodTitle').value.trim();
+  const price = parseFloat(document.getElementById('prodPrice').value)||0;
+  const stock = parseInt(document.getElementById('prodStock').value)||0;
+  if(!title){ alert('Enter product title'); return; }
+  const p = {id:uid(), title, price, stock};
+  state.products.push(p);
+  state.logs.push({t:Date.now(), msg:`Added product ${title} ($${price})`});
+  saveState(state); renderAll();
+  document.getElementById('prodTitle').value=''; document.getElementById('prodPrice').value=''; document.getElementById('prodStock').value='';
+});
+window.editProduct = function(id){
+  const p = state.products.find(x=>x.id===id);
+  const title = prompt('Title', p.title); if(title!==null) p.title = title;
+  const price = prompt('Price', p.price); if(price!==null) p.price = parseFloat(price)||0;
+  const stock = prompt('Stock', p.stock); if(stock!==null) p.stock = parseInt(stock)||0;
+  state.logs.push({t:Date.now(), msg:`Edited product ${p.title}`});
+  saveState(state); renderAll();
+}
+window.removeProduct = function(id){
+  if(!confirm('Remove product?')) return;
+  const idx = state.products.findIndex(x=>x.id===id);
+  state.logs.push({t:Date.now(), msg:`Removed product ${state.products[idx].title}`});
+  state.products.splice(idx,1); saveState(state); renderAll();
+}
+
+// combos
+document.getElementById('createCombo').addEventListener('click', ()=>{
+  const name = document.getElementById('comboName').value.trim();
+  const price = parseFloat(document.getElementById('comboPrice').value)||0;
+  const sel = Array.from(document.getElementById('comboProducts').selectedOptions).map(o=>o.value);
+  if(!name || sel.length===0){ alert('Enter combo name and select products'); return; }
+  const combo = {id:uid(), name, price, items:sel};
+  state.combos.push(combo);
+  state.logs.push({t:Date.now(), msg:`Created combo ${name} ($${price})`});
+  saveState(state); renderAll();
+  document.getElementById('comboName').value=''; document.getElementById('comboPrice').value='';
+});
+window.removeCombo = function(id){ if(!confirm('Remove combo?')) return; const idx = state.combos.findIndex(c=>c.id===id); state.logs.push({t:Date.now(), msg:`Removed combo ${state.combos[idx].name}`}); state.combos.splice(idx,1); saveState(state); renderAll(); }
+
+// wallet
+document.getElementById('saveWallet').addEventListener('click', ()=>{
+  state.wallet.currency = document.getElementById('currency').value.trim()||'USD';
+  state.wallet.address = document.getElementById('depositAddr').value.trim();
+  state.logs.push({t:Date.now(), msg:`Updated wallet address`});
+  saveState(state); renderAll();
+});
+
+// invites
+document.getElementById('genInvite').addEventListener('click', ()=>{
+  const cnt = parseInt(document.getElementById('inviteCount').value)||1;
+  const limit = document.getElementById('inviteLimit').value.trim();
+  for(let i=0;i<cnt;i++){
+    const code = 'INV-' + Math.random().toString(36).slice(2,8).toUpperCase();
+    state.invites.push({code, used:0, limit: limit? parseInt(limit): null});
+    state.logs.push({t:Date.now(), msg:`Generated invite ${code}`});
+  }
+  saveState(state); renderAll();
+});
+window.removeInvite = function(code){ if(!confirm('Remove invite?')) return; const idx = state.invites.findIndex(i=>i.code===code); if(idx>-1){ state.logs.push({t:Date.now(), msg:`Removed invite ${code}`}); state.invites.splice(idx,1); saveState(state); renderAll(); } }
+
+// users
+document.getElementById('listUsers').addEventListener('click', ()=>{ renderUsersList(); });
+document.getElementById('findUser').addEventListener('click', ()=>{
+  const q = document.getElementById('searchUser').value.trim();
+  const u = state.users.find(x=>x.username===q);
+  if(!u){ alert('User not found'); return; }
+  openEditUser(u.id);
+});
+window.openEditUser = function(id){
+  const u = state.users.find(x=>x.id===id);
+  const newName = prompt('Username', u.username);
+  if(newName!==null) u.username = newName;
+  const newBal = prompt('Balance', u.balance);
+  if(newBal!==null) u.balance = parseFloat(newBal)||0;
+  state.logs.push({t:Date.now(), msg:`Edited user ${u.username}`});
+  saveState(state); renderAll();
+}
+window.toggleBlock = function(id){
+  const u = state.users.find(x=>x.id===id); u.blocked = !u.blocked;
+  state.logs.push({t:Date.now(), msg:`${u.blocked? 'Blocked':'Unblocked'} ${u.username}`});
+  saveState(state); renderAll();
+}
+window.removeUser = function(id){ if(!confirm('Remove user?')) return; const idx = state.users.findIndex(x=>x.id===id); state.logs.push({t:Date.now(), msg:`Removed user ${state.users[idx].username}`}); state.users.splice(idx,1); saveState(state); renderAll(); }
+
+// profile and logo
+document.getElementById('saveProfile').addEventListener('click', ()=>{
+  state.site.title = document.getElementById('siteTitle').value.trim() || 'EALA80';
+  state.site.desc = document.getElementById('siteDesc').value.trim() || '';
+  const file = document.getElementById('logoFile').files[0];
+  if(file){
+    const r = new FileReader();
+    r.onload = ()=>{ state.site.logo = r.result; saveState(state); renderSiteProfile(); }
+    r.readAsDataURL(file);
+  } else { saveState(state); renderSiteProfile(); }
+  state.logs.push({t:Date.now(), msg:'Updated site profile'});
+});
+
+// logs
+document.getElementById('clearLogs').addEventListener('click', ()=>{ if(confirm('Clear logs?')){ state.logs = []; saveState(state); renderLogs(); } });
+
+// init render
+renderAll();
+</script>
+</body>
+</html>
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>EALA80 — User Panel</title>
+<style>
+:root{--bg:#fff3b0;--muted:#222}
+body{margin:0;font-family:Inter,Arial;background:var(--bg);color:var(--muted);padding:18px}
+.wrap{max-width:980px;margin:0 auto}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.logo{font-weight:800;font-size:20px}
+.card{background:rgba(255,255,255,0.95);border-radius:12px;padding:14px;margin-bottom:12px;border:1px solid #1112}
+.small{font-size:13px;color:#444}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:8px;border-bottom:1px solid #f1f1f1}
+.center{text-align:center}
+@media(max-width:760px){body{padding:12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header card">
+    <div class="logo" id="siteTitle">EALA80</div>
+    <div style="margin-left:auto"><a href="admin.html" target="_blank">Admin</a></div>
+  </div>
+
+  <div class="card">
+    <h3>Products</h3>
+    <div id="productsArea"></div>
+  </div>
+
+  <div class="card">
+    <h3>Your Balance</h3>
+    <div id="balanceArea" class="small"></div>
+  </div>
+
+  <div class="card">
+    <h3>Invite Codes</h3>
+    <div id="inviteArea" class="small"></div>
+  </div>
+
+  <div class="card center small">This user panel reads the same shared data as admin (localStorage). To get real-time across devices enable Firebase per README.</div>
+</div>
+
+<script>
+const STORAGE_KEY = 'eala_full_state_v1';
+function loadState(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{}}catch(e){return{}} }
+let state = loadState();
+if(!state.site) state.site={title:'EALA80'};
+document.getElementById('siteTitle').innerText = state.site.title || 'EALA80';
+
+function renderProducts(){
+  const el = document.getElementById('productsArea');
+  if(!state.products || state.products.length===0){ el.innerHTML='<div class="small">No products</div>'; return; }
+  let html = '<table class="table"><thead><tr><th>Product</th><th>Price(USD)</th><th>Stock</th></tr></thead><tbody>';
+  state.products.forEach(p=>{
+    html += `<tr><td>${p.title}</td><td>$${p.price}</td><td>${p.stock}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+function renderBalance(){
+  const u = state.users && state.users[0];
+  if(!u){ document.getElementById('balanceArea').innerText = 'No user'; return; }
+  document.getElementById('balanceArea').innerText = u.username + ' — Balance: $' + (u.balance||0);
+}
+function renderInvites(){
+  const inv = state.invites && state.invites.length? state.invites.map(i=>i.code).join(', '): 'No invites';
+  document.getElementById('inviteArea').innerText = inv;
+}
+
+renderProducts(); renderBalance(); renderInvites();
+</script>
+</body>
+</html>
+
+
+EALA80 Admin + User Panel (connected demo)
+
+Files:
+ - admin.html   -> Admin panel (login: EALA80 / Alif298019)
+ - user.html    -> User-facing panel (reads same shared data)
+ - All data stored under localStorage key "eala_full_state_v1" by default.
+
+Quick deploy (Netlify):
+1. Create a ZIP containing admin.html and user.html (and README.txt).
+2. On Netlify, New site -> Deploy manually -> Upload ZIP (or drag directory).
+3. After deploy, open <your-site>/admin.html to login and manage. Open <your-site>/user.html to view user panel.
+
+How data connects:
+ - If admin.html and user.html are on the SAME site (same origin), both pages read/write the same localStorage; changes will appear after refresh.
+ - For real realtime multi-device sync, you must use a backend or Firebase.
+
+Enable Firebase (optional):
+1. Create Firebase project -> Web app -> copy config snippet.
+2. Replace/add Firebase initialisation in admin.html and user.html (search for comment about FIREBASE_CONFIG).
+3. Modify JS to push state to Firestore/Realtime DB and listen for updates.
+(If you want, send me the Firebase config and I will integrate the realtime code.)
+
+Important:
+ - This is a frontend demo so users & products are stored in browser storage. For production you need a backend or Firebase.
+ - Admin credentials (demo): EALA80 / Alif298019
+
+
