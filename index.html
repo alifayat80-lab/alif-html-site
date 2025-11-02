@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>My Profile — Demo</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-top">
+        <div class="avatar">A</div>
+        <div class="user-info">
+          <div class="name-row">
+            <h1 class="username">Alimotiefar</h1>
+            <span class="vip">VIP 3</span>
+          </div>
+          <div class="invite">Invitation code: <strong>984967</strong></div>
+        </div>
+      </div>
+
+      <div class="balance-row">
+        <div class="balance">
+          <div class="small">USDT</div>
+          <div id="balanceAmount" class="amount">0.00</div>
+        </div>
+        <div class="header-actions">
+          <button id="btnDepositOpen" class="btn white">Deposit</button>
+          <button id="btnWithdraw" class="btn outline">Withdrawal</button>
+        </div>
+      </div>
+
+      <div class="quick-icons">
+        <div class="icon-card">
+          <button class="icon-btn" data-action="teams">👥</button>
+          <div class="icon-label">Teams</div>
+        </div>
+        <div class="icon-card">
+          <button class="icon-btn" data-action="record">📁</button>
+          <div class="icon-label">Record</div>
+        </div>
+        <div class="icon-card">
+          <button class="icon-btn" data-action="wallet">👛</button>
+          <div class="icon-label">Wallet</div>
+        </div>
+        <div class="icon-card">
+          <button class="icon-btn" data-action="invite">✉️</button>
+          <div class="icon-label">Invite</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Profile card -->
+    <section class="card profile-card">
+      <h2>Profile</h2>
+      <div class="profile-row"><span class="label">Username:</span><span class="value">Alimotiefar</span></div>
+      <div class="profile-row"><span class="label">Invite code:</span><span class="value">984967</span></div>
+      <div class="profile-row"><span class="label">VIP Level:</span><span class="value">VIP 3</span></div>
+      <div class="muted">Fields are read-only in demo.</div>
+    </section>
+
+    <div style="height:80px"></div>
+
+    <!-- Bottom navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item" data-tab="home">Home</button>
+      <button class="nav-item" data-tab="service">Service</button>
+      <button class="nav-item" data-tab="menu">Menu</button>
+      <button class="nav-item" data-tab="record">Record</button>
+      <button class="nav-item active" data-tab="mine">Mine</button>
+    </nav>
+  </div>
+
+  <!-- Deposit Modal -->
+  <div id="modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-box">
+      <h3>Deposit</h3>
+      <input id="depositInput" type="number" placeholder="Enter amount" min="1" />
+      <div class="row">
+        <button id="confirmDeposit" class="btn primary">Deposit</button>
+        <button id="closeModal" class="btn outline">Cancel</button>
+      </div>
+      <div class="muted small">Demo: balance stored locally (no real payments).</div>
+    </div>
+  </div>
+
+<script src="script.js"></script>
+</body>
+</html>
